@@ -1,0 +1,47 @@
+<html>
+   <head>
+      <script src="http://d3js.org/d3.v3.min.js"></script>
+      <script src="src/bagel.js"></script>
+      <style>
+         body {font-family: verdana, arial;}
+         .container {text-align:center;}
+         button {background:#ddd;padding:10px;cursor:hand;border:0;font-size:1em;font-color:#333;}
+         button:hover {background:#eee;}
+      </style>
+   </head>
+   <body>
+   <div class="container">
+       <h2>Donut</h2>
+       <div id="donut" class="chart-container"></div>
+       <button id='button'>Render</button>
+   </div>
+
+
+
+   <script>
+   let dataset = [ {name: 'Asian', percent: 30},
+      {name: 'White', percent: 40},
+      {name: 'Black', percent: 20},
+      {name: 'Native American', percent: 1},
+      {name: 'Other', percent: 9}
+   ];
+
+   let donut = bagels.donut(dataset, {
+      selector: '#donut',
+      width: 300,
+      height: 300
+   });
+
+
+   document.getElementById('button').addEventListener('click', () => {
+      donut.render(
+         [{name: 'Asian', percent: 30},
+            {name: 'White', percent: 40},
+            {name: 'Black', percent: 20},
+            {name: 'Native American', percent: 10},
+            {name: 'Other', percent: 0}]
+      );
+   })
+   </script>
+   </body>
+</html>
