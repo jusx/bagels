@@ -1,76 +1,98 @@
-const bagels = {
-   donut: (data, props) => {return new Donut(data, props);}   
-}
+const dimension = 300;
+const fills = ['#0288c9', '#ddd'];
+const bottomSize = 40;
 
-class Donut {
+class Bagel {
 
-   constructor(data, props) {
+   constructor(props) {
       this.props = props;
-      this.data = data;
+      this.data = [ props.percent, 100 - props.percent ] ;
+      this.radius = dimension * 0.5;
       this.setup();
    }
 
    setup() {
-      this.pie=d3.layout.pie()
-         .value(function(d){return d.percent})
+      this.pie = d3.layout.pie()
+         .value((d) => { return d })
          .sort(null);
 
-      let radius = Math.min(this.props.width, this.props.height) / 2;
-      this.arc=d3.svg.arc()
-         .outerRadius(radius - 20)
-         .innerRadius(radius - 100);
 
-      this.svg=d3.select(this.props.selector)
-        .append('svg')
-        .attr({
-            width: this.props.width,
-            height: this.props.height,
-            class: 'bagel-donut'
-        }).append('g')
-        .attr({
-            transform:'translate('+this.props.width/2+','+this.props.height/2+')'
-        });
+      this.arc = d3.svg.arc()
+         .outerRadius(this.radius)
+         .innerRadius(this.radius - 50);
 
-      let color = d3.scale.category20c();
-      let self = this;
-      this.path = this.svg.selectAll('path')
+      this.svg = d3.select(this.props.selector)
+         .append('svg')
+         .attr({
+            width: '100%',
+            viewBox: '0 0 ' + dimension + ' ' + (dimension + ((this.props.bottomLabel)? bottomSize : 0)) ,
+            class: 'bagel-svg'
+         });
+
+      this.svg.append('g')
+         .attr({
+            transform:'translate('+dimension/2+','+dimension/2+')',
+            class: 'bagel-data-points'
+         });
+
+      this.path = this.svg.select('.bagel-data-points').selectAll('path')
          .data(this.pie(this.data))
          .enter()
          .append('path')
          .attr({
              d: this.arc,
-             fill: function(d,i){
-               return color(d.data.name);
-            }
-         })
-         .each(function(d) { self.currentArc = d; });
-         this.animate();
+             fill: (d,i) => { return fills[i]; },
+             class: (d,i) => { return (i==1)? 'bagel-data-background' : 'bagel-data-value' ; }
+         });
+
+      this.middle();
+      this.bottom();
+      this.animate();
    }
 
-   /**
-    * Animate.
-    */
+   middle() {
+      var width;
+      let text = this.svg.select('.bagel-data-points')
+         .append('text')
+         .attr({
+            'text-anchor': 'middle',
+            'class': 'bagel-middle-label',
+            'font-size': '4.7em',
+            'dy': 20,
+            'fill': fills[0]
+         })
+
+         let percent = text.append('tspan')
+            .text(this.props.percent);
+
+         text.append('tspan')
+            .text('%')
+            .attr({
+               'font-size': '0.6em',
+               'class': 'bagel-center-text',
+               'dy': -20
+            });
+   }
+
+   bottom() {
+      this.svg.select('.bagel-data-points')
+         .append('text')
+         .text(this.props.bottomLabel)
+         .attr({
+            'dy': dimension/2 + bottomSize,
+            'text-anchor': 'middle',
+            'class': 'bagel-bottom-label',
+            'fill': fills[0]
+         });
+   }
+
    animate() {
       let self = this;
       this.path.transition().duration(500).attrTween("d", (a) => {
-         var i = d3.interpolate(this.currentArc, a);
-         this.currentArc = i(0);
+         var i = d3.interpolate({startAngle:0, stopAngle: self.props.percent}, a);
          return function(t) {
             return self.arc(i(t));
          };
       }); // redraw the arcs
-   }
-
-   /**
-    * Renders the chart in the DOM selector as specified in props.
-    *
-    * @param data the dataset to be used in rendering. This is optional.
-    *
-    */
-   render(data) {
-      if (arguments.length != 0) this.data = data;
-
-      this.path = this.path.data(this.pie(this.data));
-      this.animate();
    }
 }

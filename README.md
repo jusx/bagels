@@ -17,5 +17,11 @@ The primary goals for this project is:
 # Note
 This is an experimental project. The direction of it may change at any time.
 
+# Tests
+There will be no unit tests while the project is still in POC status. Instead a visual test is created by visually inspecting output through `demos/bagel.html`
+
 # Contributions
 Any suggestions or ideas through Pull Requests or issues are welcome.
+
+# Distribution
+Not ready for distribution while still under development and in POC status.
